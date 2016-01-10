@@ -4,18 +4,36 @@ class footer_section_1_class {
   function __construct() {
     add_action( 'customize_register', array($this, 'wpbss_customizer'));
     add_action( 'footer_section_add', array($this,'footer_add_section_1'));
-    add_action( 'add_style_options', array($this, 'wpbss_print_style'));
+    add_action( 'wp_head', array($this, 'print_style'));
     add_action( 'widgets_init', array($this, 'wpbss_register_sidebar'), 20 );
+    add_action( 'after_switch_theme', array($this,'set_default_mod_wpbss'));
 
 
   }
 
+
+  //Запускаем установку параметров темы по умолчанию при активации темы
+  function set_default_mod_wpbss() {
+
+    //проверяем есть ли настройка и если нет то назначаем
+    if(! get_theme_mod( 'footer_section_1_bg_color' )){
+      set_theme_mod( 'footer_section_1_bg_color', get_theme_mod('first_color_bg'));
+    }
+
+    if(! get_theme_mod( 'footer_section_1_color' )){
+      set_theme_mod( 'footer_section_1_color', get_theme_mod('first_color'));
+
+    }
+  }
 
 
   /*###############################
   Sidebars register
   */
   function wpbss_register_sidebar(){
+
+    //Если секция отключена, то возврат
+    if(! get_theme_mod( 'footer_section_1_enable')) return;
 
     register_sidebar(array(
     	'name' => __('Footer S1'),
@@ -32,6 +50,8 @@ class footer_section_1_class {
 
   //Add CSS option on customizer
   function wpbss_customizer($wp_customize){
+
+
 
       //Новая секция
       $wp_customize->add_section(
@@ -92,6 +112,7 @@ class footer_section_1_class {
             'capability' => 'edit_theme_options',
         )
       );
+
       $wp_customize->add_control(
      		new WP_Customize_Color_Control(
               $wp_customize,
@@ -107,12 +128,29 @@ class footer_section_1_class {
   }
 
   //Вывод стилей для перовй секции подвала
-  function wpbss_print_style() {
+  function print_style() {
+
+    //Если секция отключена, то возврат
+    if(! get_theme_mod( 'footer_section_1_enable')) return;
+
       ?>
+      <style id="wpbss-style-footer-s1" type="text/css">
+
         #footer-s1 {
             background-color: <?php echo get_theme_mod( 'footer_section_1_bg_color' ); ?>;
             color: <?php echo get_theme_mod( 'footer_section_1_color' ); ?>;
         }
+
+        #footer-s1 a {
+          color: <?php echo get_theme_mod( 'footer_section_1_color' ) ?>;
+        }
+
+      </style>
+
+      <?php
+
+      ?>
+
       <?php
   }
 

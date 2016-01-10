@@ -10,18 +10,34 @@ class footer_section_2_class {
   function __construct() {
     add_action( 'customize_register', array($this, 'wpbss_customizer'));
     add_action( 'footer_section_add', array($this,'footer_add_section'));
-    add_action( 'add_style_options', array($this, 'wpbss_print_style'));
     add_action( 'widgets_init', array($this, 'wpbss_register_sidebar'), 20 );
+    add_action( 'wp_head', array($this, 'print_style' )); // вешаем на wp_head
+    add_action( 'after_switch_theme', array($this,'set_default_mod_wpbss'));
 
 
   }
 
+  //Запускаем установку параметров темы по умолчанию при активации темы
+  function set_default_mod_wpbss() {
 
+    //проверяем есть ли настройка и если нет то назначаем
+    if(! get_theme_mod( 'footer_section_2_bg_color' )){
+      set_theme_mod( 'footer_section_2_bg_color', get_theme_mod('first_color_bg'));
+    }
+    
+    if(! get_theme_mod( 'footer_section_2_color' )){
+      set_theme_mod( 'footer_section_2_color', get_theme_mod('first_color'));
+
+    }
+  }
 
   /*###############################
   Sidebars register
   */
   function wpbss_register_sidebar(){
+
+    //Если секция отключена, то возврат
+    if(! get_theme_mod( 'footer_section_2_enable')) return;
 
     register_sidebar(array(
       'name' => __('Footer S2'),
@@ -114,31 +130,35 @@ class footer_section_2_class {
   }
 
   //Вывод стилей для перовй секции подвала
-  function wpbss_print_style() {
+  function print_style() {
+
+    //Если секция отключена, то возврат
+    if(! get_theme_mod( 'footer_section_2_enable')) return;
+
       ?>
+      <style id="wpbss-style-footer-s2" type="text/css">
+
         #footer-s2 {
           padding: 10px;
           background-color: <?php echo get_theme_mod( 'footer_section_2_bg_color' ) ?>;
           color: <?php echo get_theme_mod( 'footer_section_2_color' ) ?>;
         }
+
+        #footer-s2 a {
+          color: <?php echo get_theme_mod( 'footer_section_2_color' ) ?>;
+        }
+
+      </style>
+
       <?php
   }
 
   function footer_add_section(){
 
-    if(get_theme_mod( 'footer_section_2_enable')):
-      ?>
-        <div id="footer-s2">
-          <div class="container">
-            <?php
-                if ( ! dynamic_sidebar( 'footer-s2' ) ) :
-                    do_action( 'wpbss-footer-s2' );
-                endif; // end sidebar widget area
-            ?>
-          </div><!-- .container -->
-        </div>
-      <?php
-    endif;
+    //Если секция отключена, то возврат
+    if(! get_theme_mod( 'footer_section_2_enable')) return;
+    get_template_part( 'inc/template-parts/footer', 's2' );
+
   }
 
 

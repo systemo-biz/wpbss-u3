@@ -3,11 +3,11 @@
 class footer_section_3_class {
   function __construct() {
     add_action( 'customize_register', array($this, 'wpbss_customizer'));
-    add_action( 'add_style_options', array($this, 'wpbss_print_style'));
     add_action( 'footer_section_add', array($this,'footer_add_section'));
     add_action( 'after_switch_theme', array($this,'set_default_mod_wpbss'));
     add_action( 'wpbss-footer-widgets-1', array($this, 'wpbss_footer_widgets_1_callback' ));
 
+    add_action( 'wp_head', array($this, 'print_style' )); // вешаем на wp_head
 
     add_action( 'widgets_init', array($this, 'wpbss_register_sidebar'), 20 );
 
@@ -20,6 +20,9 @@ class footer_section_3_class {
   Sidebars for footer section 3
   */
   function wpbss_register_sidebar(){
+
+    //Если секция отключена, то возврат
+    if(! get_theme_mod( 'footer_section_3_enable')) return;
 
     		register_sidebar(array(
     			'name' => __('Footer S3P1'),
@@ -42,29 +45,13 @@ class footer_section_3_class {
 
 
 
-  /**
-   * Add Footer Menu
-   */
-  function wpbss_footer_widgets_1_callback(){
-  ?>
-      <nav id="footer-navigation" class="main-navigation" role="navigation">
-          <?php
-             if(has_nav_menu("footer")) {
-                 wp_nav_menu( array( 'theme_location' => 'footer', 'menu_id' => 'footer-menu' ) );
-             }
-          ?>
-      </nav>
-  <?php
-
-  }
-
 
   //Запускаем установку параметров темы по умолчанию при активации темы
   function set_default_mod_wpbss() {
 
     //проверяем есть ли настройка и если нет то назначаем
     if(! get_theme_mod( 'footer_section_3_enable' )){
-      set_theme_mod( 'footer_section_3_enable', true);
+      set_theme_mod( 'footer_section_3_enable', false);
     }
   }
 
@@ -145,43 +132,28 @@ class footer_section_3_class {
   }
 
   //Вывод стилей для данной секции подвала
-  function wpbss_print_style() {
-      ?>
+  function print_style() {
+    //Если отключена секция, то возврат
+		if(! get_theme_mod( 'footer_section_3_enable')) return;
+
+    ?>
+      <style id="wpbss-style-footer-s3" type="text/css">
         #footer-s3 {
           padding: 10px;
           background-color: <?php echo get_theme_mod( 'footer_section_3_bg_color' ); ?>;
           color: <?php echo get_theme_mod( 'footer_section_3_color' ); ?>;
         }
-      <?php
+      </style>
+    <?php
   }
 
 	function footer_add_section(){
-		if(get_theme_mod( 'footer_section_3_enable')):
 
-			?>
-			<div id="footer-s3">
-				<div class="container">
-		      <div class="row">
-		          <div id="footer-widgets-1" class="col-md-6">
-		              <?php
-		                  if ( ! dynamic_sidebar( 'footer-s3-p1' ) ) :
-		                      do_action( 'wpbss-footer-s3-p1' );
-		                  endif; // end sidebar widget area
-		              ?>
-		          </div>
-		          <div id="footer-widgets-2" class="col-md-6">
-		              <?php
-		                  if ( ! dynamic_sidebar( 'footer-s3-p2' ) ) :
-		                      do_action( 'wpbss-footer-s3-p2' );
-		                  endif; // end sidebar widget area
-		              ?>
-		          </div>
-		      </div><!-- .row -->
-				</div><!-- .container -->
-			</div><!-- .site-info -->
-			<?php
+    //Если отключена секция, то возврат
+		if(! get_theme_mod( 'footer_section_3_enable')) return;
 
-		endif;
+    get_template_part( 'inc/template-parts/footer', 's3' );
+
 	}
 
 
